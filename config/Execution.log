@@ -1,0 +1,27 @@
+2026-08-09 10:52:33,194-Cloudedge-ERROR-文件不存在:[Errno 2] No such file or directory: '../config.yaml'
+2026-08-09 15:40:30,126-Cloudedge-ERROR-读取文件出现异常：'NoneType' object is not subscriptable
+2026-08-09 15:40:52,674-Cloudedge-ERROR-读取文件出现异常：'NoneType' object is not subscriptable
+2026-08-09 15:41:13,621-Cloudedge-ERROR-读取文件出现异常：'NoneType' object is not subscriptable
+2026-08-09 15:41:51,492-Cloudedge-ERROR-读取文件出现异常：'NoneType' object is not subscriptable
+2026-08-09 16:29:38,872-Cloudedge-ERROR-yaml文件内容不规范：while parsing a block mapping
+  in "./config.yaml", line 1, column 1
+expected <block end>, but found '<block sequence start>'
+  in "./config.yaml", line 12, column 3
+2026-08-09 16:29:38,873-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
+2026-08-09 16:30:31,180-Cloudedge-ERROR-其他错误:while parsing a block mapping
+  in "./config.yaml", line 1, column 1
+expected <block end>, but found '<block sequence start>'
+  in "./config.yaml", line 12, column 3
+2026-08-09 16:30:31,180-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
+2026-08-09 16:31:03,477-Cloudedge-ERROR-yaml文件内容不规范：while parsing a block mapping
+  in "./config.yaml", line 1, column 1
+expected <block end>, but found '<block sequence start>'
+  in "./config.yaml", line 12, column 3
+2026-08-09 16:31:23,397-Cloudedge-ERROR-yaml文件内容不规范：while parsing a block mapping
+  in "./config.yaml", line 1, column 1
+expected <block end>, but found '<block sequence start>'
+  in "./config.yaml", line 12, column 3
+2026-08-09 16:31:23,397-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
+2026-08-09 16:31:39,642-Cloudedge-ERROR-读取config.yaml文件出现异常：list indices must be integers or slices, not str
+2026-08-09 16:31:56,412-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
+2026-08-09 16:43:54,376-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
