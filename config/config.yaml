@@ -1,7 +1,7 @@
 devices:
   # ========== 安卓设备 ==========
   # 用户1：一台安卓真机
-  - user_name: "fjc"
+  - user_name: "肥猪阿熊"
     phone_model: "Redmi Note 11 5G"
     platform: Android
     udid: "TC55LJMR59W8ZPRK"
@@ -9,7 +9,7 @@ devices:
 
   # ========== 安卓设备 ==========
   # 用户2：一台安卓模拟机
-  - user_name: "fjc"
+  - user_name: "肥猪阿熊"
     phone_model: "V2284A"
     platform: Android
     udid: "127.0.0.1:16384"
@@ -17,7 +17,7 @@ devices:
 
   # ========== iOS 设备 ==========
    # 用户3：一台IOS真机
-  - user_name: "fjc"
+  - user_name: "肥猪阿熊"
     phone_model: "iPhone 14"
     platform: iOS
     udid: "00008110-000130AA1A05401E"  # 你的 iPhone UDID
