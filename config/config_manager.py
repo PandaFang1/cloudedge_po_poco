@@ -1,12 +1,7 @@
 import os
-# from collections import Counter
-# from dataclasses import field
-# from itertools import count
+from logging import setLogRecordFactory
 
 import yaml
-# from Xlib.Xcursorfont import pirate
-# from selenium.webdriver.common.devtools.v136.cache_storage import request_entries
-
 from utils.log_utils import logger
 
 
@@ -19,11 +14,28 @@ class ConfigError(Exception):
 
 class ConfigManager:
     """统一管理配置"""
+
+    #类属性--平台列表
+    platform_lists = ["android", "ios"]
+
+    # 类属性--关键字段
+    keywords_lists = ["platform", "uuid", "app_package", "wda_port"]
+
+    #类属性--字段的数据类型
+    COMMON_FIELD_TYPES = {
+        "user_name" : str,
+        "phone_model" : str,
+        "platform" : str,
+        "udid": str,
+        "app_package" : str,
+    }
+    #类属性--IOS特有字段
+    IOS_FIELD_TYPES = {
+        "wda_port" : int
+    }
+
     def __init__(self,config_dir):
         self.config_dir = config_dir #初始化文件路径
-        #类属性
-        self.platform_lists = ["android", "ios"]
-        self.keyword_lists = ["platform","uuid","app_package","wda_port"]
 
     def _read_yaml_file(self,filepath):
         """
@@ -64,10 +76,14 @@ class ConfigManager:
         logger.info(f"获取到{filepath}文件中{device}的键列表")
         return key_value_lists,"返回键列表"
 
+    def _general_key_check(self,device):
+        for k in device.keys():
+
+
 
     def _value_type_check(self,value,except_type,filepath):
         """
-        yaml文件中的字段类型校验
+        yaml文件中的数据类型校验
         :param data:
         :return:
         """
@@ -86,7 +102,7 @@ class ConfigManager:
         :return:
         """
 
-        if value.lowwer() not in self.platform_lists:
+        if value.lower() not in self.platform_lists:
             raise ConfigError(
                 f"文件{filepath}中的平台类型不是预期的数据类型{expect_platform}",
                 f"实际数据是{value}"
@@ -100,7 +116,7 @@ class ConfigManager:
         :return:
         """
         existing_keys = list(data.keys()) #获取原始文件中的键，转换为列表
-        allowed_key_list  = self.keyword_lists#获取必须要求的键
+        allowed_key_list  = self.keywords_lists#获取必须要求的键
         #检查是否缺少键，missing_keyword返回的是列表，即使没有返回的也是列表
         missing_keyword = [k for k in allowed_key_list if k not in existing_keys]
         if missing_keyword:
@@ -117,7 +133,7 @@ class ConfigManager:
         :param filepath:
         :return:
         """
-        if device["platform"].lowwer() != "ios":
+        if device["platform"].lower() != "ios":
             if "wda_port" in device:
                 ConfigError(
                     f'{filepath}文件中的{device["udid"]}的设备包含端口号',
@@ -153,6 +169,11 @@ class ConfigManager:
             logger.error(f"读取config.yaml文件出现异常：{e}")
             return None
 
+
+
+
+
+
     def get_mobile_platform(self):
         """
         获取设备列表长度以及
@@ -178,11 +199,18 @@ class ConfigManager:
             print("无数据")
 
 config = ConfigManager("./")
-data = config.get_all_devices()
+data = config.read_singledev()
 print(data)
-data_1 = {'user_name': '肥猪阿熊', 'phone_model': 'Redmi Note 11 5G', 'platform': 'Android', 'udid': 'TC55LJMR59W8ZPRK', 'app_package': 'com.cloudedge.smarteye'}
-if "udid" in data_1:
-    print(f"'udid'在字典里")
+data= config.get_all_devices()
+# print(data)
+for i in data:
+    for j in i.keys():
+        print(j)
+# print(type(data))
+# print(len(data))
+# data_1 = {'user_name': '肥猪阿熊', 'phone_model': 'Redmi Note 11 5G', 'platform': 'Android', 'udid': 'TC55LJMR59W8ZPRK', 'app_package': 'com.cloudedge.smarteye'}
+# if "udid" in data_1:
+#     print(f"'udid'在字典里")
 # config.get_mobile_platform()
 # data = {'user_name': '肥猪阿熊', 'phone_model': 'Redmi Note 11 5G', 'platform': 'Android', 'udid': 'TC55LJMR59W8ZPRK', 'app_package': 'com.cloudedge.smarteye'}
 # for k,v in data.items():
