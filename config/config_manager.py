@@ -198,21 +198,3 @@ class ConfigManager:
         else:
             print("无数据")
 
-config = ConfigManager("./")
-data = config.read_singledev()
-print(data)
-data= config.get_all_devices()
-# print(data)
-for i in data:
-    for j in i.keys():
-        print(j)
-# print(type(data))
-# print(len(data))
-# data_1 = {'user_name': '肥猪阿熊', 'phone_model': 'Redmi Note 11 5G', 'platform': 'Android', 'udid': 'TC55LJMR59W8ZPRK', 'app_package': 'com.cloudedge.smarteye'}
-# if "udid" in data_1:
-#     print(f"'udid'在字典里")
-# config.get_mobile_platform()
-# data = {'user_name': '肥猪阿熊', 'phone_model': 'Redmi Note 11 5G', 'platform': 'Android', 'udid': 'TC55LJMR59W8ZPRK', 'app_package': 'com.cloudedge.smarteye'}
-# for k,v in data.items():
-#     print("键：",k)
-#     print("值：",v)
