@@ -1,13 +1,14 @@
 import os
-from collections import Counter
-from dataclasses import field
-from itertools import count
+# from collections import Counter
+# from dataclasses import field
+# from itertools import count
 
 import yaml
-from Xlib.Xcursorfont import pirate
-from selenium.webdriver.common.devtools.v136.cache_storage import request_entries
+# from Xlib.Xcursorfont import pirate
+# from selenium.webdriver.common.devtools.v136.cache_storage import request_entries
 
 from utils.log_utils import logger
+
 
 class ConfigError(Exception):
     """
@@ -119,13 +120,13 @@ class ConfigManager:
         if device["platform"].lowwer() != "ios":
             if "wda_port" in device:
                 ConfigError(
-                    f"{filepath}文件中的{device["udid"]}的设备包含端口号",
+                    f'{filepath}文件中的{device["udid"]}的设备包含端口号',
                     f"安卓手机无需配置端口号"
                 )
         if device["platform"].lowwer() == "ios":
             if "wda_port" not in device:
                 ConfigError(
-                    f"{filepath}文件中的{device["udid"]}的设备未包含端口号",
+                    f'{filepath}文件中的{device["udid"]}的设备未包含端口号',
                     f"IOS手机需要配置端口号"
                 )
 
@@ -163,9 +164,9 @@ class ConfigManager:
                 mobile_platform = self.get_all_devices()[i]["platform"]
                 if self.get_all_devices()[i]["platform"]:
                     if mobile_platform == "Android"or"android":
-                        print(f"安卓机{self.get_all_devices()[i]["phone_model"]}")
+                        print(f'安卓机{self.get_all_devices()[i]["phone_model"]}')
                     else:
-                        print(f"ios{self.get_all_devices()[i]["phone_model"]}")
+                        print(f'ios{self.get_all_devices()[i]["phone_model"]}')
                 else:
                     print("配置列表无手机型号")
 
