@@ -19,7 +19,7 @@ class ConfigManager:
     platform_lists = ["android", "ios"]
 
     # 类属性--关键字段
-    keywords_lists = ["platform", "uuid", "app_package", "wda_port"]
+    keywords_lists = ["platform", "uuid", "app_package"]
 
     #类属性--字段的数据类型
     COMMON_FIELD_TYPES = {
@@ -65,21 +65,64 @@ class ConfigManager:
 
     def _get_single_dev_key(self,device,filepath):
         """
-        获取yaml文件中的所有设备的键值
-        :param device:
-        :param filepath:
-        :return:
+        获取yaml文件中单个设备的所有键，返回一个列表
         """
         key_value_lists = []
         for k in device.keys():
             key_value_lists.append(k)
         logger.info(f"获取到{filepath}文件中{device}的键列表")
-        return key_value_lists,"返回键列表"
+        return key_value_lists,"返回单个device的列表"
 
-    def _general_key_check(self,device):
-        for k in device.keys():
+    def _keyword_check(self,data,filepath):
+        """
+        yaml文件中的关键字段检查：platform,uuid,app_package
+        :param value:
+        :param except_keyword:
+        :return:
+        """
+        existing_keys = self._get_single_dev_key() #获取原始文件中的键，转换为列表
+        allowed_key_list  = self.keywords_lists#获取必须要求的键
+        #检查是否缺少键，missing_keyword返回的是列表，即使没有返回的也是列表
+        missing_keyword = [k for k in allowed_key_list if k not in existing_keys]
+        if missing_keyword:
+            raise ConfigError(
+                f"{filepath}中缺少关键属性{missing_keyword}",
+                f"当前存在的属性是{existing_keys}",
+                f"必要的属性是{allowed_key_list}"
+            )
+
+    def _device_ios_platform_num(self,devices,filepath):
+        """
+        统计ios的设备数量并返回数量
+        """
+        dev_ios_num = 0
+        for device in devices:
+            if device["platform"].lower() == 'ios':
+                dev_ios_num +=1
+        return dev_ios_num,"返回ios设备数量，为整数"
 
 
+    def _device_port_check(self,device,filepath):
+        """
+        安卓手机和单台无需配置端口号，ios多台需要配置端口号
+        :param device:
+        :param filepath:
+        :return:
+        """
+        num = self._device_ios_platform_num()
+        if num <=1 and device[platform].lower():
+        if device["platform"].lower() != "ios":
+            if "wda_port" in device:
+                ConfigError(
+                    f'{filepath}文件中的{device["udid"]}的设备包含端口号',
+                    f"安卓手机无需配置端口号"
+                )
+        if device["platform"].lowwer() == "ios":
+            if "wda_port" not in device:
+                ConfigError(
+                    f'{filepath}文件中的{device["udid"]}的设备未包含端口号',
+                    f"IOS手机需要配置端口号"
+                )
 
     def _value_type_check(self,value,except_type,filepath):
         """
@@ -108,43 +151,7 @@ class ConfigManager:
                 f"实际数据是{value}"
             )
 
-    def _keyword_check(self,filepath):
-        """
-        yaml文件中的关键字段检查：platform,uuid,app_package,wda_port
-        :param value:
-        :param except_keyword:
-        :return:
-        """
-        existing_keys = list(data.keys()) #获取原始文件中的键，转换为列表
-        allowed_key_list  = self.keywords_lists#获取必须要求的键
-        #检查是否缺少键，missing_keyword返回的是列表，即使没有返回的也是列表
-        missing_keyword = [k for k in allowed_key_list if k not in existing_keys]
-        if missing_keyword:
-            raise ConfigError(
-                f"{filepath}中缺少关键属性{missing_keyword}",
-                f"当前存在的属性是{existing_keys}",
-                f"必要的属性是{allowed_key_list}"
-            )
 
-    def _device_port_check(self,device,filepath):
-        """
-        安卓手机无需配置端口号，ios多台需要配置端口号
-        :param device:
-        :param filepath:
-        :return:
-        """
-        if device["platform"].lower() != "ios":
-            if "wda_port" in device:
-                ConfigError(
-                    f'{filepath}文件中的{device["udid"]}的设备包含端口号',
-                    f"安卓手机无需配置端口号"
-                )
-        if device["platform"].lowwer() == "ios":
-            if "wda_port" not in device:
-                ConfigError(
-                    f'{filepath}文件中的{device["udid"]}的设备未包含端口号',
-                    f"IOS手机需要配置端口号"
-                )
 
     def _get_ios_port(self,devices,filepath):
         """
@@ -198,21 +205,3 @@ class ConfigManager:
         else:
             print("无数据")
 
-config = ConfigManager("./")
-data = config.read_singledev()
-print(data)
-data= config.get_all_devices()
-# print(data)
-for i in data:
-    for j in i.keys():
-        print(j)
-# print(type(data))
-# print(len(data))
-# data_1 = {'user_name': '肥猪阿熊', 'phone_model': 'Redmi Note 11 5G', 'platform': 'Android', 'udid': 'TC55LJMR59W8ZPRK', 'app_package': 'com.cloudedge.smarteye'}
-# if "udid" in data_1:
-#     print(f"'udid'在字典里")
-# config.get_mobile_platform()
-# data = {'user_name': '肥猪阿熊', 'phone_model': 'Redmi Note 11 5G', 'platform': 'Android', 'udid': 'TC55LJMR59W8ZPRK', 'app_package': 'com.cloudedge.smarteye'}
-# for k,v in data.items():
-#     print("键：",k)
-#     print("值：",v)
