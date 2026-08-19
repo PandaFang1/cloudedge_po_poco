@@ -1,6 +1,4 @@
 import os
-from logging import setLogRecordFactory
-
 import yaml
 from utils.log_utils import logger
 
@@ -63,26 +61,25 @@ class ConfigManager:
             logger.error(f"其他错误:{e}")
             return None
 
-    def _get_single_dev_key(self,device,filepath):
+    def _get_single_key(self,keywords,filepath):
         """
-        获取yaml文件中单个设备的所有键，返回一个列表
+        获取yaml文件中单个元素的所有键，返回一个列表
         """
         key_value_lists = []
-        for k in device.keys():
+        for k in keywords.keys():
             key_value_lists.append(k)
-        logger.info(f"获取到{filepath}文件中{device}的键列表")
-        return key_value_lists,"返回单个device的列表"
+        return key_value_lists,"返回单个元素键的列表"
 
-    def _keyword_check(self,data,filepath):
+    def _keyword_check(self,filepath):
         """
         yaml文件中的关键字段检查：platform,uuid,app_package
         :param value:
         :param except_keyword:
         :return:
         """
-        existing_keys = self._get_single_dev_key() #获取原始文件中的键，转换为列表
-        allowed_key_list  = self.keywords_lists#获取必须要求的键
-        #检查是否缺少键，missing_keyword返回的是列表，即使没有返回的也是列表
+        existing_keys = self._get_single_key()  # 获取原始文件中的键，转换为列表
+        allowed_key_list = self.keywords_lists  # 获取必须要求的键
+        # 检查是否缺少键，missing_keyword返回的是列表，即使没有返回的也是列表
         missing_keyword = [k for k in allowed_key_list if k not in existing_keys]
         if missing_keyword:
             raise ConfigError(
@@ -90,39 +87,6 @@ class ConfigManager:
                 f"当前存在的属性是{existing_keys}",
                 f"必要的属性是{allowed_key_list}"
             )
-
-    def _device_ios_platform_num(self,devices,filepath):
-        """
-        统计ios的设备数量并返回数量
-        """
-        dev_ios_num = 0
-        for device in devices:
-            if device["platform"].lower() == 'ios':
-                dev_ios_num +=1
-        return dev_ios_num,"返回ios设备数量，为整数"
-
-
-    def _device_port_check(self,device,filepath):
-        """
-        安卓手机和单台无需配置端口号，ios多台需要配置端口号
-        :param device:
-        :param filepath:
-        :return:
-        """
-        num = self._device_ios_platform_num()
-        if num <=1 and device[platform].lower():
-        if device["platform"].lower() != "ios":
-            if "wda_port" in device:
-                ConfigError(
-                    f'{filepath}文件中的{device["udid"]}的设备包含端口号',
-                    f"安卓手机无需配置端口号"
-                )
-        if device["platform"].lowwer() == "ios":
-            if "wda_port" not in device:
-                ConfigError(
-                    f'{filepath}文件中的{device["udid"]}的设备未包含端口号',
-                    f"IOS手机需要配置端口号"
-                )
 
     def _value_type_check(self,value,except_type,filepath):
         """
@@ -132,37 +96,29 @@ class ConfigManager:
         """
         if not isinstance(value,except_type):
             raise ConfigError(
-                f"文件{filepath}中的值不是预期的数据类型{except_type}",
+                f"文件{filepath}中的值{value}不是预期的数据类型{except_type}",
                 f"实际类型是{type(value)}"
             )
 
-    def _value_platform_check(self,value,expect_platform,filepath):
+    def _value_check(self,value,expect_value,filepath):
         """
-        判断platform是否正确
-        :param value:
-        :param expect_platform:
-        :param filepath:
-        :return:
+        yaml文件中关键字段的值校验
         """
-
-        if value.lower() not in self.platform_lists:
+        if value.lower() not in expect_value:
             raise ConfigError(
-                f"文件{filepath}中的平台类型不是预期的数据类型{expect_platform}",
-                f"实际数据是{value}"
+                f"文件{filepath}中的{value}不是预期的值{expect_value}"
             )
 
+    def _validate_value_dependency(self,data,dependent_field,dependency_field,allowed_combinations,filepath):
+        """
+        data:当前被校验的字典
+        dependent_fieled：依赖者
+        dependency_field:被依赖者
+        allowed_combinations：两者的关系
+        """
 
 
-    def _get_ios_port(self,devices,filepath):
-        """
-        检查IOS端口是否配置合理，包含重复性校验，范围检测
-        :param devices:
-        :param filepath:
-        :return:
-        """
-        for device in devices:
-            if devices["platform"].lowwer() == "ios":
-                pass
+
 
 
     def get_all_devices(self):
@@ -204,4 +160,3 @@ class ConfigManager:
             print(self._read_yaml_file("config.yaml")["devices"])
         else:
             print("无数据")
-
