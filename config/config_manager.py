@@ -146,17 +146,30 @@ class ConfigManager:
         """
         existing_lists：列表嵌套字典形式
         dependency_field:需要检验的字段
-        dependent_field:对值的重复性进行校验，找出相同的值，并找出他们在字典中的唯一关键字
+        dependent_field:字典中的唯一关键字
         """
         exist_combinations = {} #用于记录整个列表嵌套字典中的唯一值和需要检测重复的值
         for existing_dic in existing_lists: #遍历列表
             if dependency_field not in existing_dic: #判断是否有这个字段在字典中
                 continue #如果不存在则结束此次循环
-            #判断这个键的值是否在已存在的
-            
+            #判断这个键的值是否在已存在的，值作为键，唯一标志作为值，存储在exist_combiantions中
+            exist_key = existing_dic.get(dependent_field)
+            exist_value = existing_dic[dependency_field]
+            if exist_value in exist_combinations:
+                raise ConfigError(
+                    f"文件{filepath}的{exist_key}中字段{dependency_field}的值重复"
+                )
+            exist_combinations[exist_value] = exist_key
 
-
-
+    def validate_all(self):
+        """
+        初始化文件（校验文件）
+        """
+        devices = self.get_all_devices()#读取文件中的所有信息
+        for device in devices:
+            """
+            单设备通用校验
+            """
 
 
     def get_all_devices(self):
@@ -169,11 +182,6 @@ class ConfigManager:
         except Exception as e:
             logger.error(f"读取config.yaml文件出现异常：{e}")
             return None
-
-
-
-
-
 
     def get_mobile_platform(self):
         """
