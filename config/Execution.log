@@ -25,3 +25,33 @@ expected <block end>, but found '<block sequence start>'
 2026-08-09 16:31:39,642-Cloudedge-ERROR-读取config.yaml文件出现异常：list indices must be integers or slices, not str
 2026-08-09 16:31:56,412-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
 2026-08-09 16:43:54,376-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
+2026-08-24 20:51:31,966-Cloudedge-ERROR-其他错误:[Errno 20] Not a directory: 'config.yaml/config.yaml'
+2026-08-24 20:51:31,967-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
+2026-08-24 20:54:16,284-Cloudedge-ERROR-其他错误:[Errno 20] Not a directory: 'config.yaml/config.yaml'
+2026-08-24 20:54:16,285-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
+2026-08-24 20:55:05,583-Cloudedge-ERROR-文件不存在:[Errno 2] No such file or directory: '../config.yaml'
+2026-08-24 20:55:05,583-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
+2026-08-24 20:55:31,544-Cloudedge-ERROR-其他错误:[Errno 20] Not a directory: './config.yaml/config.yaml'
+2026-08-24 20:55:31,544-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
+2026-08-24 20:56:45,620-Cloudedge-ERROR-文件不存在:[Errno 2] No such file or directory: '../config.yaml'
+2026-08-24 20:56:45,620-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
+2026-08-24 20:58:48,989-Cloudedge-ERROR-文件不存在:[Errno 2] No such file or directory: '__file__/config.yaml'
+2026-08-24 20:58:48,989-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
+2026-08-24 20:58:58,594-Cloudedge-ERROR-其他错误:[Errno 20] Not a directory: '/Users/fangxiaoc/Desktop/汇总-fjc/PO_PythonProject/config/config_manager.py/config.yaml'
+2026-08-24 20:58:58,594-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
+2026-08-24 21:00:23,209-Cloudedge-ERROR-文件不存在:[Errno 2] No such file or directory: './config/config.yaml'
+2026-08-24 21:00:23,209-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
+2026-08-24 21:05:28,730-Cloudedge-ERROR-文件不存在:[Errno 2] No such file or directory: './config/config.yaml'
+2026-08-24 21:05:28,730-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
+2026-08-24 21:05:41,440-Cloudedge-ERROR-文件不存在:[Errno 2] No such file or directory: './config/config.yaml'
+2026-08-24 21:05:41,440-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
+2026-08-24 21:05:59,098-Cloudedge-ERROR-文件不存在:[Errno 2] No such file or directory: 'config/config.yaml'
+2026-08-24 21:05:59,098-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
+2026-08-24 21:08:34,178-Cloudedge-ERROR-文件不存在:[Errno 2] No such file or directory: 'PO_PythonProject/config/config.yaml'
+2026-08-24 21:08:34,179-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
+2026-08-24 21:08:39,208-Cloudedge-ERROR-文件不存在:[Errno 2] No such file or directory: './PO_PythonProject/config/config.yaml'
+2026-08-24 21:08:39,208-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
+2026-08-24 21:09:12,103-Cloudedge-ERROR-其他错误:[Errno 20] Not a directory: '/Users/fangxiaoc/Desktop/汇总-fjc/PO_PythonProject/config/config.yaml/config.yaml'
+2026-08-24 21:09:12,103-Cloudedge-ERROR-读取config.yaml文件出现异常：'NoneType' object is not subscriptable
+2026-08-24 21:09:41,546-Cloudedge-ERROR-读取config.yaml文件出现异常：ConfigManager._read_yaml_file() takes 1 positional argument but 2 were given
+2026-08-26 22:04:08,173-Cloudedge-ERROR-读取config.yaml文件出现异常：ConfigManager._read_yaml_file() takes 1 positional argument but 2 were given

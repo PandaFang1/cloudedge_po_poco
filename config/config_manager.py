@@ -1,6 +1,3 @@
-import os
-from typing import AnyStr
-
 import yaml
 from utils.log_utils import logger
 
@@ -14,11 +11,11 @@ class ConfigError(Exception):
 class ConfigManager:
     """统一管理配置"""
 
-    #类属性--平台列表
-    platform_lists = ["android", "ios"]
+    #类属性--字典
+    platform_dicts = {"platform":["android","ios"]}
 
     # 类属性--关键字段
-    keywords_lists = ["platform", "uuid", "app_package"]
+    keywords_lists = ["platform", "udid", "app_package"]
 
     #类属性--字段的数据类型
     COMMON_FIELD_TYPES = {
@@ -27,22 +24,27 @@ class ConfigManager:
         "platform" : str,
         "udid": str,
         "app_package" : str,
+        "wda_port":int
     }
     #类属性--IOS特有字段
     IOS_FIELD_TYPES = {
         "wda_port" : int
     }
+    ALLOWED_COMBINATIONS = {
+        "ios": ["wda_port"],
+        "android": []
+    }
 
-    def __init__(self,config_dir):
+    def __init__(self,config_dir,config_list_map):
         self.config_dir = config_dir #初始化文件路径
+        self.config_list_map = config_list_map #列表名称
 
-    def _read_yaml_file(self,filepath):
+    def _read_yaml_file(self):
         """
         读取文件
         """
         try:
-            file_path = os.path.join(self.config_dir,filepath)#拼接文件路径和文件名字
-            with open(file_path,"r",encoding="utf-8") as f: #以只读的方式读取文件
+            with open(self.config_dir,"r",encoding="utf-8") as f: #以只读的方式读取文件
                 return yaml.safe_load(f) #返回读取的数据
         except FileNotFoundError as e:
             logger.error(f"文件不存在:{e}")
@@ -61,7 +63,7 @@ class ConfigManager:
             return None
 
     @staticmethod
-    def _keyword_check(existing_dic:dict[str:AnyStr],allowed_key_list:list[AnyStr],filepath):
+    def _keyword_check(existing_dic,allowed_key_list,filepath):
         """
         yaml文件中的关键字段检查：platform,uuid,app_package:
         """
@@ -70,10 +72,24 @@ class ConfigManager:
         missing_keyword = [k for k in allowed_key_list if k not in existing_key_list]
         if missing_keyword:
             raise ConfigError(
-                f"{filepath}中缺少关键属性{missing_keyword}",
+                f"{filepath}文件缺少关键属性{missing_keyword}",
                 f"当前存在的属性是{existing_key_list}",
                 f"必要的属性是{allowed_key_list}"
             )
+
+    @staticmethod
+    def _value_check_(value,key,filepath):
+        """
+        对yaml文件中的值是否为空进行校验，包含None,空格,[],{}
+        """
+        if value  is None or value.strip() is None:
+            raise ConfigError(f"文件{filepath}中{key}的值是空的"
+            )
+        if len(value)==0:
+            raise ConfigError(
+                f"文件{filepath}中{key}列表/字典是空的"
+            )
+
 
     @staticmethod
     def _value_type_check(value,except_type,filepath):
@@ -87,7 +103,7 @@ class ConfigManager:
             )
 
     @staticmethod
-    def _value_check(value,expect_value,filepath):
+    def _key_value_check(value,expect_value,filepath):
         """
         yaml文件中关键字段的值校验
         """
@@ -102,7 +118,7 @@ class ConfigManager:
         exiting_dict:当前被校验的字典---{platform:ios/android,
                                         wda_port:8001}
         dependent_field：依赖者----wda_port
-        dependency_field:被依赖者---paltorm
+        dependency_field:被依赖者---platform
         allowed_combinations：两者的关系{ios:[wda_port]
                                        android:[]     }
         """
@@ -119,7 +135,7 @@ class ConfigManager:
             )
 
         #判断depd_value的具体的值，再根据allowed_combinations的值来做处理
-        allowed_value = allowed_combinations[depd_value] #获取键depd_value在allowed_combinations的值
+        allowed_value = allowed_combinations[depd_value.lower()] #获取键depd_value在allowed_combinations的值
         if dependent_field in allowed_combinations:#判断依赖者是否在两者关系中的，存在继续对值做判断，不存在则抛出异常
             #allowed_value值做判断，空，和依赖者一致，和依赖者不一致
             if not allowed_value: #如果为空，则输出无需依赖者
@@ -142,7 +158,10 @@ class ConfigManager:
             )
 
     @staticmethod
-    def _value_repeatability_check(existing_lists,dependent_field,dependency_field,filepath):
+    def _value_repeatability_check(existing_lists,
+                                   dependent_field,
+                                   dependency_field,
+                                   filepath):
         """
         existing_lists：列表嵌套字典形式
         dependency_field:需要检验的字段
@@ -152,7 +171,7 @@ class ConfigManager:
         for existing_dic in existing_lists: #遍历列表
             if dependency_field not in existing_dic: #判断是否有这个字段在字典中
                 continue #如果不存在则结束此次循环
-            #判断这个键的值是否在已存在的，值作为键，唯一标志作为值，存储在exist_combiantions中
+            #判断这个键的值是否在已存在的，值作为键，唯一标志作为值，存储在exist_combinations中
             exist_key = existing_dic.get(dependent_field)
             exist_value = existing_dic[dependency_field]
             if exist_value in exist_combinations:
@@ -170,6 +189,18 @@ class ConfigManager:
             """
             单设备通用校验
             """
+            self._keyword_check(device,self.keywords_lists,"config.yaml")#关键字检查
+            print(1)
+            self._validate_dictvalue_dependency(device,"wda_port","platform",self.ALLOWED_COMBINATIONS,self.config_dir)
+            # for k,v in device.items():
+            #     if k in self.COMMON_FIELD_TYPES:
+            #         except_type = self.COMMON_FIELD_TYPES[k]
+            #         # self._value_check_(v,k,self.config_dir)  #空值检查
+            #         self._value_type_check(v,except_type,self.config_dir) #类型检查
+            #     if k in self.platform_dicts:
+            #         self._key_value_check(v,self.platform_dicts.get(k),self.config_dir) #关键字的值检查
+
+
 
 
     def get_all_devices(self):
@@ -178,7 +209,7 @@ class ConfigManager:
         :return:
         """
         try:
-            return self._read_yaml_file("config.yaml")["devices"]
+            return self._read_yaml_file()[self.config_list_map]
         except Exception as e:
             logger.error(f"读取config.yaml文件出现异常：{e}")
             return None
@@ -201,16 +232,5 @@ class ConfigManager:
                     print("配置列表无手机型号")
 
 
-    def read_devices(self):
-        if self._read_yaml_file("config.yaml"):
-            print(self._read_yaml_file("config.yaml")["devices"])
-        else:
-            print("无数据")
-
-
-data = {
-        "App":[1,2],
-        "Package": []
-    }
-if "App" in data:
-    print("t")
+data =ConfigManager("./config.yaml","devices")
+data.validate_all()
