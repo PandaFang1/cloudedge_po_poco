@@ -12,10 +12,19 @@ class ConfigManager:
     """统一管理配置"""
 
     #类属性--字典
-    platform_dicts = {"platform":["android","ios"]}
+    PLATFORM_DICTS = {"platform":["android","ios"]}
+
+    #唯一标志：
+    UNIQUE_ID = "udid"
+
+    #平台分类：
+    IOS_RECOGNIZE= "ios"
+    ANDROID_RECOGNIZE = "android"
+    PLATFORM = "platform"
+    WDA_PORT="wda_port"
 
     # 类属性--关键字段
-    keywords_lists = ["platform", "udid", "app_package"]
+    KEYWORDS_LISTS = ["platform", "udid", "app_package"]
 
     #类属性--字段的数据类型
     COMMON_FIELD_TYPES = {
@@ -26,18 +35,21 @@ class ConfigManager:
         "app_package" : str,
         "wda_port":int
     }
-    #类属性--IOS特有字段
-    IOS_FIELD_TYPES = {
-        "wda_port" : int
-    }
+
+    #类属性--多台IOS特有字段
     ALLOWED_COMBINATIONS = {
         "ios": ["wda_port"],
         "android": []
     }
 
+    #依赖关系：
+    DEPENDENCY_FIELD = "platform"
+    DEPENDENT_FIELD = "wda_port"
+
+
     def __init__(self,config_dir,config_list_map):
         self.config_dir = config_dir #初始化文件路径
-        self.config_list_map = config_list_map #列表名称
+        self.config_list_map = config_list_map #yamle中的列表名称
 
     def _read_yaml_file(self):
         """
@@ -63,106 +75,103 @@ class ConfigManager:
             return None
 
     @staticmethod
-    def _keyword_check(existing_dic,allowed_key_list,filepath):
+    def _keyword_check(existing_dic,allowed_key_list):
         """
         yaml文件中的关键字段检查：platform,uuid,app_package:
         """
         existing_key_list =[k for k in existing_dic.keys()] # 获取原始文件中的键，转换为列表
-        # 检查是否缺少键，missing_keyword返回的是列表，即使没有返回的也是列表
-        missing_keyword = [k for k in allowed_key_list if k not in existing_key_list]
+        missing_keyword = [k for k in allowed_key_list if k not in existing_key_list]        # 检查是否缺少键，missing_keyword返回的是列表，即使没有返回的也是列表
         if missing_keyword:
             raise ConfigError(
-                f"{filepath}文件缺少关键属性{missing_keyword}",
-                f"当前存在的属性是{existing_key_list}",
-                f"必要的属性是{allowed_key_list}"
-            )
+                    f"缺少如下关键字：{missing_keyword}"
+                )
 
     @staticmethod
-    def _value_check_(value,key,filepath):
+    def _value_none_check_(dic):
         """
-        对yaml文件中的值是否为空进行校验，包含None,空格,[],{}
+        对yaml文件中的值是否为空进行校验，包含None,空格,[],{},
         """
-        if value  is None or value.strip() is None:
-            raise ConfigError(f"文件{filepath}中{key}的值是空的"
-            )
-        if len(value)==0:
-            raise ConfigError(
-                f"文件{filepath}中{key}列表/字典是空的"
-            )
+        for k,v in dic.items():
+            if not v :
+                raise ConfigError(
+                    f"{k}的值为空"
+                )
+
 
 
     @staticmethod
-    def _value_type_check(value,except_type,filepath):
+    def _value_type_check(value,except_type):
         """
         yaml文件中的数据类型校验
         """
-        if not isinstance(value,except_type):
+        if not isinstance(value,except_type):#数据类型方法isinstance
             raise ConfigError(
-                f"文件{filepath}中的值{value}不是预期的数据类型{except_type}",
+                f"值{value}不是预期的数据类型{except_type}",
                 f"实际类型是{type(value)}"
             )
 
     @staticmethod
-    def _key_value_check(value,expect_value,filepath):
+    def _key_value_check(value,expect_value):
         """
         yaml文件中关键字段的值校验
         """
         if value.lower() not in expect_value:
             raise ConfigError(
-                f"文件{filepath}中的{value}不是预期的值{expect_value}"
+                f"{value}不是预期的值{expect_value}"
             )
 
     @staticmethod
-    def _validate_dictvalue_dependency(existing_dict,dependent_field,dependency_field,allowed_combinations,filepath):
+    def _validate_dictvalue_dependency(existing_dict,dependency_field,dependent_field,allowed_combinations):
         """
         exiting_dict:当前被校验的字典---{platform:ios/android,
                                         wda_port:8001}
-        dependent_field：依赖者----wda_port
-        dependency_field:被依赖者---platform
-        allowed_combinations：两者的关系{ios:[wda_port]
+        dependent_field：属性依赖者----wda_port
+        dependency_field:属性被依赖者---platform
+        allowed_combinations：属性值的关系{ios:[wda_port]
                                        android:[]     }
         """
-        depd_value = existing_dict[dependency_field] #获取被依赖者,如果无被依赖者则返回为None
-        if not depd_value:
-            raise ConfigError(
-                f"文件{filepath}中缺少被依赖者{dependency_field}"
-            )
-        #判断depd_value是否在allowed_combinations中，保持一致性会先对两种数据进行小写处理
-        allowed_combinations_lower_list =[k for k in allowed_combinations]
-        if depd_value.lower() not in allowed_combinations_lower_list:
-            raise ConfigError(
-                f"文件{filepath}中被依赖者{dependency_field}的值不在依赖关系中"
-            )
-
-        #判断depd_value的具体的值，再根据allowed_combinations的值来做处理
-        allowed_value = allowed_combinations[depd_value.lower()] #获取键depd_value在allowed_combinations的值
-        if dependent_field in allowed_combinations:#判断依赖者是否在两者关系中的，存在继续对值做判断，不存在则抛出异常
-            #allowed_value值做判断，空，和依赖者一致，和依赖者不一致
-            if not allowed_value: #如果为空，则输出无需依赖者
+        depd_value = existing_dict[dependency_field] #取出platform的值
+        # 判断depd_value的具体的值
+        allowed_value = allowed_combinations[depd_value.lower()]
+        if allowed_value is None or len(allowed_value) == 0:
+            if dependent_field  in existing_dict:
                 raise ConfigError(
-                    f"文件{filepath}中的依赖者{dependent_field}不需要此依赖"
-                )
+                    f"不需要依赖{dependent_field}"
+                 )
         else:
-            raise ConfigError(
-                f"文件{filepath}中两者关系中未包含依赖者{dependent_field}"
-            )
+            if dependent_field not in existing_dict:
+                raise  ConfigError(
+                    f"缺少{dependent_field}，请检查依赖关系表和源文件"
+                )
 
     @staticmethod
-    def _value_range_check(value,expect_range,filepath):
+    def _value_range_check(existing_value,expect_range):
         """
         对值的范围进行校验
         """
-        if value not in expect_range:
+        if existing_value not in expect_range:
             raise ConfigError(
-                f"文件{filepath}中的{value}不在设定的范围内，设定的范围是{expect_range}"
+                f"{existing_value}不在设定的范围内，设定的范围是{expect_range}"
             )
 
     @staticmethod
-    def _value_repeatability_check(existing_lists,
-                                   dependent_field,
-                                   dependency_field,
-                                   filepath):
+    def _type_nums(map_lists,except_key,except_value,dependent_field,unique_id):
         """
+        统计整个列表地图中的值的数量,并使用唯一标志位保存在字典中返回
+        """
+        dicts = {}
+        except_value_num = 0
+        for map_list in map_lists:
+            if map_list[except_key].lower()==except_value:
+              dicts[map_list[unique_id]] = map_list[dependent_field]
+              except_value_num += 1
+        return dicts,except_value_num
+
+
+    @staticmethod
+    def _value_repeatability_check(existing_lists,dependent_field,dependency_field):
+        """
+        重复性校验
         existing_lists：列表嵌套字典形式
         dependency_field:需要检验的字段
         dependent_field:字典中的唯一关键字
@@ -176,7 +185,7 @@ class ConfigManager:
             exist_value = existing_dic[dependency_field]
             if exist_value in exist_combinations:
                 raise ConfigError(
-                    f"文件{filepath}的{exist_key}中字段{dependency_field}的值重复"
+                    f"{exist_key}中字段{dependency_field}的值重复"
                 )
             exist_combinations[exist_value] = exist_key
 
@@ -185,23 +194,34 @@ class ConfigManager:
         初始化文件（校验文件）
         """
         devices = self.get_all_devices()#读取文件中的所有信息
+        logger.info("文件初始化开始")
         for device in devices:
             """
             单设备通用校验
+            1、关键字检查
+            2、空值检查
+            3、值的类型检查
+            4、特定字段的值检查
             """
-            self._keyword_check(device,self.keywords_lists,"config.yaml")#关键字检查
-            print(1)
-            self._validate_dictvalue_dependency(device,"wda_port","platform",self.ALLOWED_COMBINATIONS,self.config_dir)
-            # for k,v in device.items():
-            #     if k in self.COMMON_FIELD_TYPES:
-            #         except_type = self.COMMON_FIELD_TYPES[k]
-            #         # self._value_check_(v,k,self.config_dir)  #空值检查
-            #         self._value_type_check(v,except_type,self.config_dir) #类型检查
-            #     if k in self.platform_dicts:
-            #         self._key_value_check(v,self.platform_dicts.get(k),self.config_dir) #关键字的值检查
-
-
-
+            logger.debug(f"开始检查{device[self.UNIQUE_ID]}")
+            self._keyword_check(device,self.KEYWORDS_LISTS)#检查关键字
+            self._value_none_check_(device)  # 空值检查
+            for device_attribute,device_value in device.items():
+                self._value_type_check(device_value,self.COMMON_FIELD_TYPES[device_attribute])#值的类型检查
+                if device_attribute in self.PLATFORM_DICTS:
+                    self._key_value_check(device_value,self.PLATFORM_DICTS[device_attribute])#特定字段的值检查
+                self._validate_dictvalue_dependency(device, self.DEPENDENCY_FIELD, self.DEPENDENT_FIELD,self.ALLOWED_COMBINATIONS)#检查ios和安卓是否有wda_port参数
+                if device_attribute.lower() == self.WDA_PORT:
+                    self._value_range_check(device_value,range(8100,9100))
+            logger.debug(f"{device[self.UNIQUE_ID]}检查完成")
+            """处理端口逻辑：
+            1、安卓不需要端口，ios单台不需要，ios多台需要配置wda_port
+            2、ios端口范围校验
+            3、ios端口重复校验
+            """
+        self._value_repeatability_check(devices,self.UNIQUE_ID,self.WDA_PORT)
+        logger.info("文件初始化完成")
+        return devices
 
     def get_all_devices(self):
         """
@@ -232,5 +252,5 @@ class ConfigManager:
                     print("配置列表无手机型号")
 
 
-data =ConfigManager("./config.yaml","devices")
-data.validate_all()
+# data =ConfigManager("./config.yaml","devices")
+# data.validate_all()
