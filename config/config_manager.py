@@ -252,5 +252,5 @@ class ConfigManager:
                     print("配置列表无手机型号")
 
 
-# data =ConfigManager("./config.yaml","devices")
-# data.validate_all()
+data =ConfigManager("./config.yaml","devices")
+data.validate_all()

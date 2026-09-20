@@ -1,28 +1,42 @@
 import logging
+import os
+from datetime import datetime
+from pathlib import Path
 
-class Logger:
-    def __init__(self,file_name,file_date,log_size,file_dir,log_default_level):
-        self.file_name = file_name  #日志文件名
-        self.file_date = file_date #日志日期
-        self.log_size = log_size #日志大小
-        self.file_dir = file_dir #日志存储路径
-        self.log_default_level = log_default_level #日志默认级别
+ROOT_MARKERS = ["config","utils","pages"]
+def operate_log_filepath(makers=None):
+    """
+    根据markers中文件名来寻找项目根目录
+    :param makers: list of str, if None, use ROOT_MARKERS
+    """
+    if makers is None:
+        makers = ROOT_MARKERS
+    current_dir = Path(__file__).resolve().parent #获取当前文件所在目录
+    for dir in [current_dir,*current_dir.parents]: #根据目录层级遍历目录，current_dir.parents返回的是一个path的对象，*解包
+        for marker in ROOT_MARKERS:#遍历ROOT_MARKERS中的文件名，如果都存在则返回当前目录确认为根目录
+            if not (dir/marker).exists(): #dir/marker拼接目录，判断是否存在此目录
+                break  #不存在直接中断进行下一个循环
+            return dir #若均存在，则返回当前目录
+    return current_dir #若均没有存在，则返回当前执行的文件目录
 
-    def log_file_auto_update(self):
-        logger = logging.getLogger("Cloudedge") #创建logger实例
-        logger.setLevel(logging.DEBUG) #设置日志默认级别
-        #设置流处理器，输出在控制台的日志
-        ch = logging.StreamHandler() #创建流处理器的实例
-        ch.setLevel(logging.INFO) #设置流处理展示的日志级别
-        #设置文件处理器，把日志保存在在文件中
-        file = logging.FileHandler("Execution.log") #创建文件处理器的实例
-        file.setLevel(logging.DEBUG) #设置文件处理展示的日志级别
-        #设置日志打印格式
-        formatter = logging.Formatter('%(asctime)s-%(name)s-%(levelname)s-%(message)s')
-        #处理器添加格式配置
-        ch.setFormatter(formatter)
-        file.setFormatter(formatter)
-        #添加日志配置
-        logger.addHandler(ch)
-        logger.addHandler(file)
+def file_size(file_path):
+    size = Path(file_path).stat().st_size
+    while size > 1024:
 
+
+
+
+def get_logger():
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(filename)s|%(module)s  - %(levelname)s - %(message)s')
+    ch = logging.StreamHandler()
+    ch.setFormatter(formatter)
+    ch.setLevel(logging.INFO)
+    logger.addHandler(ch)
+    current_date = datetime.now().strftime('%Y-%m-%d')
+    fh = logging.FileHandler(f'operate/log_{current_date}.log')
+    fh.setFormatter(formatter)
+    fh.setLevel(logging.DEBUG)
+    logger.addHandler(fh)
+    return logger
